@@ -1,0 +1,60 @@
+import os
+import time
+import schedule
+import smtplib
+from email.mime.text import MIMEText
+from datetime import datetime
+
+#connect to a specified database and perform a daily backup of a specified table.
+def backup_table():
+    try:
+        connection = mysql.connector.connect(
+            host='localhost',
+            user='xxx',
+            password='xxx',
+            database='retail_data'
+        )
+
+        cursor = connection.cursor()
+        
+        table_name = 'sales'
+
+        backup_file = f'/Users/suzylau/dumps/Dump20230122.sql'
+
+        backup_command = f'mysqldump-user-root-retail_data > /Users/suzylau/dumps/Dump20230122.sql'
+        
+        os.system(backup_command)
+
+        cursor.close()
+        connection.close()
+
+        print(f'sales backup completed successfully.')
+    except mysql.connector.Error as e:
+        print(f'An error occurred while backing up sales: {e}')
+        
+        #send email
+        send_email('Backup Successful', f'sales backup completed successfully.')
+    except mysql.connector.Error as e:
+        send_email('Backup Error', f'An error occurred while backing up sales: {e}')
+
+schedule.every().day.at("00:00").do(backup_table)
+while True:
+    schedule.run_pending()
+    time.sleep(1)
+    
+#send email
+def send_email():
+    try:
+        msg = MIMEText(body)
+        msg['Subject'] = subject
+        msg['From'] = 'xxx@gmail.com'
+        msg['To'] = 'xxxx@gmail.com'
+
+        server = smtplib.SMTP('smtp.xxx.com')
+        server.starttls()
+        server.login('xxx@gmail.com', 'xxxx')
+        server.send_message(msg)
+        server.quit()
+
+    except Exception as e:
+        print(f'Error sending email: {e}')
